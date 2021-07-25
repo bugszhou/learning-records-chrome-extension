@@ -44,8 +44,6 @@ export function removeLib(id) {
         return obj;
       }, {});
 
-    console.log(list);
-
     store(storageKey, list);
   });
 }

@@ -62,8 +62,8 @@
       </el-card>
     </div>
     <div class="review__list" v-if="selectedLib">
-      <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-        <el-tab-pane label="今日复习" name="first">
+      <el-tabs v-model="selectedTab" type="card" @tab-click="handleClick">
+        <el-tab-pane label="今日复习" name="today">
           <div class="review__body">
             <el-collapse
               v-model="activeRecords"
@@ -138,7 +138,7 @@
             </el-collapse>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="全部内容" name="second">全部</el-tab-pane>
+        <el-tab-pane label="全部内容" name="all">全部</el-tab-pane>
       </el-tabs>
     </div>
 
@@ -210,8 +210,7 @@ export default {
        */
       libs: [],
       navList: [],
-      activeIndex2: "1",
-      activeName: "first",
+      selectedTab: "today",
       tableData: [
         {
           id: "01",
@@ -319,7 +318,6 @@ export default {
           // eslint-disable-next-line prettier/prettier
           (item) => String(item.id) === String(libId),
         )[0] || {};
-      console.log(this.selectedLib);
     },
     /**
      * 删除复习库
@@ -327,8 +325,8 @@ export default {
     async handleDelLib() {
       await removeLib(this.selectedLib.id);
       await this.queryLibList();
+      this.selectedLib = null;
       this.selectLib();
-      console.log(this.selectedLib);
     },
     /**
      * 默认选择复习库
