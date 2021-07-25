@@ -29,6 +29,27 @@ export function clearLib() {
   return remove(storageKey);
 }
 
+export function removeLib(id) {
+  return query(storageKey).then((data) => {
+    if (!data || Object.keys(data || {}).length === 0) {
+      return true;
+    }
+
+    const libData = data[storageKey];
+
+    const list = Object.keys(libData || {})
+      .filter((libId) => String(libId) !== String(id))
+      .reduce((obj, currId) => {
+        obj[currId] = libData[currId];
+        return obj;
+      }, {});
+
+    console.log(list);
+
+    store(storageKey, list);
+  });
+}
+
 export function createLib(name) {
   return query(storageKey)
     .then((data) => {

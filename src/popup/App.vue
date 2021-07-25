@@ -9,10 +9,10 @@
       新增复习库
     </el-button>
     <el-menu
-      :default-active="activeIndex2"
+      :default-active="String(selectedLib && selectedLib.id)"
       class="el-menu-demo"
       mode="horizontal"
-      @select="handleSelect"
+      @select="handleLibSelected"
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b"
@@ -20,7 +20,7 @@
       <el-submenu index="1">
         <template slot="title">我的复习库</template>
         <el-menu-item
-          :index="item.id"
+          :index="String(item.id)"
           v-for="(item, index) in navList"
           v-bind:key="index"
         >
@@ -31,10 +31,10 @@
         </el-menu-item>
       </el-submenu>
     </el-menu>
-    <div class="review-info">
+    <div class="review-info" v-if="selectedLib">
       <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <span class="review__header">算法和数据结构</span>
+          <span class="review__header">{{ selectedLib.name }}</span>
         </div>
         <section style="text-align: right">
           <el-button
@@ -44,18 +44,24 @@
           >
             新增记录
           </el-button>
-          <el-button style="padding: 3px 4px" type="danger"> 删除 </el-button>
+          <el-button
+            style="padding: 3px 4px"
+            type="danger"
+            @click="handleDelLib"
+          >
+            删除
+          </el-button>
           <el-button style="padding: 3px 4px" type="text"> 结束 </el-button>
         </section>
         <p class="review__tip">复习时间间隔建议：1天、2天、5天、10天、31天</p>
         <h3>复习概况：</h3>
         <section class="review__desc">
-          <div class="text item">复习总数：10</div>
-          <div class="text item">今日复习数：10</div>
+          <div class="text item">复习总数：{{ selectedLib.total }}</div>
+          <div class="text item">今日复习数：{{ selectedLib.today }}</div>
         </section>
       </el-card>
     </div>
-    <div class="review__list">
+    <div class="review__list" v-if="selectedLib">
       <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
         <el-tab-pane label="今日复习" name="first">
           <div class="review__body">
@@ -192,14 +198,18 @@ import {
   createLib,
   queryLibList,
   normalizeLibList,
+  removeLib,
 } from "../lib/storage/storeLib";
 
 export default {
   name: "App",
   data() {
     return {
+      /**
+       * 所有的复习库
+       */
+      libs: [],
       navList: [],
-      activeIndex: "1",
       activeIndex2: "1",
       activeName: "first",
       tableData: [
@@ -209,6 +219,7 @@ export default {
           next: "2021-07-22 15:30:02",
         },
       ],
+      selectedLib: {},
       activeRecords: ["1"],
       showNewLibDialog: false,
       newLib: {
@@ -224,8 +235,9 @@ export default {
       },
     };
   },
-  mounted() {
-    this.queryLibList();
+  async mounted() {
+    await this.queryLibList();
+    this.selectLib();
   },
   methods: {
     handleSelect(key, keyPath) {
@@ -282,16 +294,56 @@ export default {
         duration: 3000,
       });
       this.queryLibList();
+      this.selectLib();
     },
+    /**
+     * 查询已有的复习库
+     */
     async queryLibList() {
       const list = await queryLibList();
       const data = normalizeLibList(list);
+      this.libs = data;
       this.navList = data.map((item) => ({
         id: item.id,
         name: item.name,
         total: item.total,
         today: item.today,
       }));
+    },
+    /**
+     * 选择复习库
+     */
+    handleLibSelected(libId) {
+      this.selectedLib =
+        this.navList.filter(
+          // eslint-disable-next-line prettier/prettier
+          (item) => String(item.id) === String(libId),
+        )[0] || {};
+      console.log(this.selectedLib);
+    },
+    /**
+     * 删除复习库
+     */
+    async handleDelLib() {
+      await removeLib(this.selectedLib.id);
+      await this.queryLibList();
+      this.selectLib();
+      console.log(this.selectedLib);
+    },
+    /**
+     * 默认选择复习库
+     */
+    selectLib(isRefresh = false) {
+      if (isRefresh) {
+        this.selectedLib = this.libs[0];
+        return;
+      }
+
+      if (this.selectedLib && Object.keys(this.selectedLib).length !== 0) {
+        return;
+      }
+
+      this.selectedLib = this.libs[0];
     },
   },
 };
