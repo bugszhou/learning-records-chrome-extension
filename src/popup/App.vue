@@ -1,6 +1,13 @@
 <template>
   <div class="main">
-    <h3>复习记录器</h3>
+    <h1>复习记录器</h1>
+    <el-button
+      style="padding: 3px 4px; margin-top: 20px; margin-bottom: 10px"
+      type="text"
+      @click="handleShowNewLib"
+    >
+      新增复习库
+    </el-button>
     <el-menu
       :default-active="activeIndex2"
       class="el-menu-demo"
@@ -12,8 +19,15 @@
     >
       <el-submenu index="1">
         <template slot="title">我的复习库</template>
-        <el-menu-item index="1-1">
-          算法和数据结构 (今日：10，总计：100)
+        <el-menu-item
+          :index="item.id"
+          v-for="(item, index) in navList"
+          v-bind:key="index"
+        >
+          {{ item.name }}
+          <span class="item__desc"
+            >(今日：{{ item.today }}，总计：{{ item.total }})</span
+          >
         </el-menu-item>
       </el-submenu>
     </el-menu>
@@ -33,9 +47,12 @@
           <el-button style="padding: 3px 4px" type="danger"> 删除 </el-button>
           <el-button style="padding: 3px 4px" type="text"> 结束 </el-button>
         </section>
-        <div v-for="o in 4" :key="o" class="text item">
-          {{ "列表内容 " + o }}
-        </div>
+        <p class="review__tip">复习时间间隔建议：1天、2天、5天、10天、31天</p>
+        <h3>复习概况：</h3>
+        <section class="review__desc">
+          <div class="text item">复习总数：10</div>
+          <div class="text item">今日复习数：10</div>
+        </section>
       </el-card>
     </div>
     <div class="review__list">
@@ -69,12 +86,9 @@
                 <el-table :data="tableData" border style="width: 100%">
                   <el-table-column fixed prop="id" label="序号" width="50">
                   </el-table-column>
-                  <el-table-column prop="date" label="复习时间" width="130">
+                  <el-table-column prop="date" label="复习时间" width="140">
                   </el-table-column>
-                  <el-table-column prop="next" label="下次复习时间" width="130">
-                  </el-table-column>
-                  <el-table-column fixed="right" label="操作" width="50">
-                    <el-button type="text" size="small">编辑</el-button>
+                  <el-table-column prop="next" label="下次复习时间" width="140">
                   </el-table-column>
                 </el-table>
               </el-collapse-item>
@@ -122,6 +136,19 @@
       </el-tabs>
     </div>
 
+    <!-- 新增复习库 -->
+    <el-dialog title="新增复习库" :visible.sync="showNewLibDialog">
+      <el-form :model="newLib">
+        <el-form-item label="复习库名称">
+          <el-input v-model="newLib.name"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="showNewLibDialog = false">取 消</el-button>
+        <el-button type="primary" @click="handleAddReviewLib">确 定</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 新增学习记录 -->
     <el-dialog title="新增学习记录" :visible.sync="showNewDialog">
       <el-form :model="newReviewRecord">
@@ -161,10 +188,17 @@
 </template>
 
 <script>
+import {
+  createLib,
+  queryLibList,
+  normalizeLibList,
+} from "../lib/storage/storeLib";
+
 export default {
   name: "App",
   data() {
     return {
+      navList: [],
       activeIndex: "1",
       activeIndex2: "1",
       activeName: "first",
@@ -176,6 +210,10 @@ export default {
         },
       ],
       activeRecords: ["1"],
+      showNewLibDialog: false,
+      newLib: {
+        name: "",
+      },
       showNewDialog: false,
       newReviewRecord: {
         content: "",
@@ -185,6 +223,9 @@ export default {
         date: "",
       },
     };
+  },
+  mounted() {
+    this.queryLibList();
   },
   methods: {
     handleSelect(key, keyPath) {
@@ -224,6 +265,33 @@ export default {
     handleAddReviewItem() {
       this.showNewReviewItemDialog = false;
       console.log(this.newReviewItem);
+    },
+    handleShowNewLib() {
+      this.showNewLibDialog = true;
+    },
+    /**
+     * 新增复习库
+     */
+    async handleAddReviewLib() {
+      this.showNewLibDialog = false;
+      await createLib(this.newLib.name);
+
+      this.$notify({
+        title: "添加成功",
+        message: "复习库已经添加成功",
+        duration: 3000,
+      });
+      this.queryLibList();
+    },
+    async queryLibList() {
+      const list = await queryLibList();
+      const data = normalizeLibList(list);
+      this.navList = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        total: item.total,
+        today: item.today,
+      }));
     },
   },
 };
@@ -305,7 +373,23 @@ body {
   border: 1px solid #e4e7ed;
 }
 
+.review__desc {
+  padding: 20px 10px;
+  border: 1px solid #e4e7ed;
+}
+
 .el-dialog {
   width: 80%;
+}
+
+.review__tip {
+  color: #f14545;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.item__desc {
+  font-size: 12px;
+  color: #aeb0b3;
 }
 </style>
