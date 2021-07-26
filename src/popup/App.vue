@@ -117,7 +117,7 @@
               <el-button
                 style="padding: 10px 10px; margin-bottom: 10px"
                 type="primary"
-                @click="handleShowReviewItemDialog(index)"
+                @click="handleShowReviewItemDialog(record)"
               >
                 新增复习记录
               </el-button>
@@ -215,7 +215,7 @@
                 <el-button
                   style="padding: 10px 10px; margin-bottom: 10px"
                   type="primary"
-                  @click="handleShowReviewItemDialog(index)"
+                  @click="handleShowReviewItemDialog(record)"
                 >
                   新增复习记录
                 </el-button>
@@ -344,7 +344,7 @@ export default {
       libs: [],
       navList: [],
       selectedTab: "1",
-      selectedReviewInd: -1,
+      selectedReview: null,
       selectedLib: {},
       showNewLibDialog: false,
       newLib: {
@@ -430,23 +430,24 @@ export default {
     /**
      * 显示复习记录
      */
-    handleShowReviewItemDialog(ind) {
+    handleShowReviewItemDialog(record) {
       this.showNewReviewItemDialog = true;
-      this.selectedReviewInd = ind;
+      this.selectedReview = record;
+      console.log(record);
     },
     /**
      * 取消新增
      */
     handleHideReviewItemDialog() {
       this.showNewReviewItemDialog = false;
-      this.selectedReviewInd = -1;
+      this.selectedReview = null;
     },
     /**
      * 保存复习记录
      */
     async handleAddReviewItem() {
       this.showNewReviewItemDialog = false;
-      if (this.selectedReviewInd === -1 || !this.newReviewItem.date) {
+      if (!this.selectedReview || !this.newReviewItem.date) {
         this.$notify.error({
           title: "添加失败",
           message: "数据有误，请重试",
@@ -454,13 +455,15 @@ export default {
         });
         return;
       }
+      console.log(this.selectedLib);
+
       await addReview({
         libId: this.selectedLib.id,
-        learningInd: this.selectedReviewInd,
+        learningId: this.selectedReview.id,
         nextReviewDate: this.newReviewItem.date,
       });
       await this.updateSelectedLib();
-      this.selectedReviewInd = -1;
+      this.selectedReview = null;
       this.newReviewItem = {
         date: "",
       };

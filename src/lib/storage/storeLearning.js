@@ -18,7 +18,7 @@ export async function createLearning(data) {
     lib.item = [];
   }
   const learning = {
-    id: lib.item + 1,
+    id: lib.item.length + 1,
     name: data.name,
     content: data.content,
     lastReviewTime: +new Date(),
@@ -73,13 +73,32 @@ export async function addReview(data) {
     return { status: "TIME_ERROR", msg: "下一次复习时间错误", data: null };
   }
 
-  if (!Array.isArray(lib.item[data.learningInd].reviews)) {
-    lib.item[data.learningInd].reviews = [];
-  }
-  reviews.id = lib.item[data.learningInd].reviews.length + 1;
+  const item = lib.item.filter(
+    (learning) => String(learning.id) === String(data.learningId),
+  )[0];
 
-  lib.item[data.learningInd].reviews.push(reviews);
-  lib.item[data.learningInd].nextReviewTime = reviews.next;
+  if (!Array.isArray(item.reviews)) {
+    item.reviews = [];
+  }
+  reviews.id = item.reviews.length + 1;
+
+  item.reviews.push(reviews);
+  item.nextReviewTime = reviews.next;
+
+  let ind = -1;
+  lib.item.some((learning, index) => {
+    if (String(learning.id) === String(data.learningId)) {
+      ind = index;
+      return true;
+    }
+    return false;
+  });
+
+  if (ind === -1) {
+    return { status: "LEARNING_ERROR", msg: "未找到学习记录", data: null };
+  }
+
+  lib.item[ind] = item;
 
   return await updateLib(lib);
 }
