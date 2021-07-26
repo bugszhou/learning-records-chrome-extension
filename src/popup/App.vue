@@ -9,7 +9,7 @@
       新增复习库
     </el-button>
     <el-menu
-      :default-active="String(selectedLib && selectedLib.id)"
+      :default-active="defaultLib"
       class="el-menu-demo"
       mode="horizontal"
       @select="handleLibSelected"
@@ -21,8 +21,8 @@
         <template slot="title">我的复习库</template>
         <el-menu-item
           :index="String(item.id)"
-          v-for="(item, index) in navList"
-          v-bind:key="index"
+          v-for="item in navList"
+          v-bind:key="item.id"
         >
           {{ item.name }}
           <span class="item__desc"
@@ -361,6 +361,14 @@ export default {
       },
     };
   },
+  computed: {
+    defaultLib() {
+      if (!this.selectedLib) {
+        return "0";
+      }
+      return String(this.selectedLib.id);
+    },
+  },
   async mounted() {
     this.init();
   },
@@ -513,7 +521,7 @@ export default {
      */
     handleLibSelected(libId) {
       this.selectedLib =
-        this.navList.filter(
+        this.libs.filter(
           // eslint-disable-next-line prettier/prettier
           (item) => String(item.id) === String(libId),
         )[0] || {};
