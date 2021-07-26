@@ -18,6 +18,7 @@ export async function createLearning(data) {
     lib.item = [];
   }
   const learning = {
+    id: lib.item + 1,
     name: data.name,
     content: data.content,
     lastReviewTime: +new Date(),
@@ -62,6 +63,32 @@ export async function addReview(data) {
   reviews.id = lib.item[data.learningInd].reviews.length + 1;
 
   lib.item[data.learningInd].reviews.push(reviews);
+
+  return await updateLib(lib);
+}
+
+export async function removeReview(options) {
+  if (!options.reviewId) {
+    return { status: "INDEX_ERROR", msg: "复习记录编号错误", data: null };
+  }
+
+  const lib = await queryLibById(options.libId);
+
+  if (!lib) {
+    return { status: "NO_LIB", msg: "未查到复习库", data: null };
+  }
+
+  if (!Array.isArray(lib.item)) {
+    return { status: "NO_LEARNING", msg: "未查到学习记录", data: null };
+  }
+
+  if (!Array.isArray(lib.item[options.learningInd].reviews)) {
+    return { status: "NO_LEARNING_REVIEW", msg: "未查到学习记录", data: null };
+  }
+
+  lib.item[options.learningInd].reviews = lib.item[
+    options.learningInd
+  ].reviews.filter((review) => String(review.id) !== String(options.reviewId));
 
   return await updateLib(lib);
 }

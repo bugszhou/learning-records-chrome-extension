@@ -145,6 +145,7 @@ export function normalizeLibList(list) {
       if (nextReviewTime >= +todayStart && nextReviewTime < +todayEnd) {
         total += 1;
       }
+      return total;
     }, 0);
   });
 

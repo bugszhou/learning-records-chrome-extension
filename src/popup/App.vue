@@ -137,7 +137,9 @@
                   <el-table-column fixed="right" label="操作" width="50">
                     <template slot-scope="scope">
                       <el-button
-                        @click.native.prevent="handleDeleteReview(scope.$index)"
+                        @click.native.prevent="
+                          handleDeleteReview(scope.row, index)
+                        "
                         type="text"
                         size="small"
                       >
@@ -217,7 +219,11 @@ import {
   normalizeLibList,
   removeLib,
 } from "../lib/storage/storeLib";
-import { createLearning, addReview } from "../lib/storage/storeLearning";
+import {
+  createLearning,
+  addReview,
+  removeReview,
+} from "../lib/storage/storeLearning";
 import { dateFormat } from "../lib/utils";
 
 export default {
@@ -331,6 +337,22 @@ export default {
         learningInd: this.selectedReviewInd,
         nextReviewDate: this.newReviewItem.date,
       });
+      await this.updateSelectedLib();
+    },
+    async handleDeleteReview(review, learningInd) {
+      await removeReview({
+        reviewId: review.id,
+        libId: this.selectedLib.id,
+        learningInd,
+      });
+      this.$notify.success({
+        title: "成功",
+        message: "删除成功",
+        duration: 2000,
+      });
+      await this.updateSelectedLib();
+    },
+    async updateSelectedLib() {
       await this.queryLibList();
       this.selectedLib = this.libs.filter(
         (lib) => String(lib.id) === String(this.selectedLib.id),
