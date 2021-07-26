@@ -147,6 +147,30 @@ export function normalizeLibList(list) {
       }
       return total;
     }, 0);
+
+    item.todayList =  item.item.filter((curr) => {
+      if (!curr || !curr.nextReviewTime) {
+        return false;
+      }
+      const nextReviewTime = +new Date(curr.nextReviewTime);
+
+      const todayDate = new Date();
+      const todayStart = new Date(
+        todayDate.getFullYear(),
+        todayDate.getMonth(),
+        todayDate.getDate(),
+      );
+      const todayEnd = new Date(
+        todayDate.getFullYear(),
+        todayDate.getMonth(),
+        todayDate.getDate() + 1,
+      );
+
+      if (nextReviewTime >= +todayStart && nextReviewTime < +todayEnd) {
+        return true
+      }
+      return false;
+    });
   });
 
   return list;
