@@ -148,7 +148,7 @@
                   <template slot-scope="scope">
                     <el-button
                       @click.native.prevent="
-                        handleDeleteReview(scope.row, index)
+                        handleDeleteReview(scope.row, record)
                       "
                       type="text"
                       size="small"
@@ -246,7 +246,7 @@
                     <template slot-scope="scope">
                       <el-button
                         @click.native.prevent="
-                          handleDeleteReview(scope.row, index)
+                          handleDeleteReview(scope.row, record)
                         "
                         type="text"
                         size="small"
@@ -433,7 +433,6 @@ export default {
     handleShowReviewItemDialog(record) {
       this.showNewReviewItemDialog = true;
       this.selectedReview = record;
-      console.log(record);
     },
     /**
      * 取消新增
@@ -455,7 +454,6 @@ export default {
         });
         return;
       }
-      console.log(this.selectedLib);
 
       await addReview({
         libId: this.selectedLib.id,
@@ -468,11 +466,11 @@ export default {
         date: "",
       };
     },
-    async handleDeleteReview(review, learningInd) {
+    async handleDeleteReview(review, record) {
       await removeReview({
         reviewId: review.id,
         libId: this.selectedLib.id,
-        learningInd,
+        learningId: record.id,
       });
       this.$notify.success({
         title: "成功",

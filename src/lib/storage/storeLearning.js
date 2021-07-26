@@ -118,13 +118,22 @@ export async function removeReview(options) {
     return { status: "NO_LEARNING", msg: "未查到学习记录", data: null };
   }
 
-  if (!Array.isArray(lib.item[options.learningInd].reviews)) {
+  let ind = -1;
+  lib.item.some((learning, index) => {
+    if (String(learning.id) === String(options.learningId)) {
+      ind = index;
+      return true;
+    }
+    return false;
+  });
+
+  if (!Array.isArray(lib.item[ind].reviews)) {
     return { status: "NO_LEARNING_REVIEW", msg: "未查到学习记录", data: null };
   }
 
-  lib.item[options.learningInd].reviews = lib.item[
-    options.learningInd
-  ].reviews.filter((review) => String(review.id) !== String(options.reviewId));
+  lib.item[ind].reviews = lib.item[ind].reviews.filter(
+    (review) => String(review.id) !== String(options.reviewId),
+  );
 
   return await updateLib(lib);
 }
