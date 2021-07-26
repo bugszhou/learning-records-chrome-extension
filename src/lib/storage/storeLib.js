@@ -59,7 +59,7 @@ export function createLib(name) {
 
       const libData = data[storageKey];
 
-      id = Object.keys(libData).sort((a, b) => b - a)[0];
+      id = Object.keys(libData).sort((a, b) => b - a)[0] || 1;
 
       return { id: Number(id) + 1, list: libData };
     })
@@ -75,6 +75,21 @@ export function createLib(name) {
     });
 }
 
+export async function updateLib(lib) {
+  if (!lib || !lib.id) {
+    return { status: "DATA_ERROR", msg: "参数错误", data: null };
+  }
+
+  const data = await query(storageKey);
+  if (!data) {
+    return [];
+  }
+
+  const libs = data[storageKey] || {};
+  libs[lib.id] = lib;
+  return store(storageKey, libs);
+}
+
 export async function queryLibList() {
   const data = await query(storageKey);
   if (!data) {
@@ -85,6 +100,18 @@ export async function queryLibList() {
   return Object.keys(list)
     .sort((a, b) => b - a)
     .map((id) => list[id]);
+}
+
+export async function queryLibById(libId) {
+  const data = await queryLibList();
+
+  const lib = data.filter((item) => String(item.id) === String(libId))[0];
+
+  if (!lib) {
+    return {};
+  }
+
+  return lib;
 }
 
 export function normalizeLibList(list) {

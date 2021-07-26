@@ -66,72 +66,84 @@
         <el-tab-pane label="今日复习" name="today">
           <div class="review__body">
             <el-collapse
+              v-for="(record, index) in selectedLib.item"
+              v-bind:key="record.id"
               v-model="activeRecords"
               @change="handleActiveRecordChange"
             >
-              <el-collapse-item title="两数之和" name="1">
+              <el-collapse-item :title="record.name" :name="index">
                 <div class="review__info">
                   <div class="review__info-warp">
-                    <div class="info">上一次学习：2021-07-25 20:12:30</div>
-                    <div class="info">下一次学习：2021-07-26 20:12:30</div>
                     <div class="info">
-                      <span class="info__item">已学习：5次</span>
+                      上一次学习：{{
+                        dateFormat(
+                          +new Date(record.lastReviewTime),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}
+                    </div>
+                    <div class="info">
+                      下一次学习：{{
+                        dateFormat(
+                          +new Date(record.nextReviewTime),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}
+                    </div>
+                    <div class="info">
+                      <span class="info__item"
+                        >已学习：{{
+                          record.reviews && record.reviews.length
+                            ? record.reviews.length
+                            : 0
+                        }}次</span
+                      >
                     </div>
                   </div>
                   <h4>学习内容：</h4>
-                  <div class="review__content">https://baidu.com</div>
+                  <div class="review__content">{{ record.content }}</div>
                 </div>
                 <h4>学习记录：</h4>
                 <el-button
                   style="padding: 10px 10px; margin-bottom: 10px"
                   type="primary"
-                  @click="handleShowReviewItemDialog"
+                  @click="handleShowReviewItemDialog(index)"
                 >
                   新增复习记录
                 </el-button>
-                <el-table :data="tableData" border style="width: 100%">
+                <el-table :data="record.reviews" border style="width: 100%">
                   <el-table-column fixed prop="id" label="序号" width="50">
                   </el-table-column>
-                  <el-table-column prop="date" label="复习时间" width="140">
+                  <el-table-column prop="date" label="复习时间" width="125">
+                    <template slot-scope="scope">
+                      <span>{{
+                        dateFormat(
+                          +new Date(scope.row.date),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}</span>
+                    </template>
                   </el-table-column>
-                  <el-table-column prop="next" label="下次复习时间" width="140">
-                  </el-table-column>
-                </el-table>
-              </el-collapse-item>
-            </el-collapse>
-            <el-collapse
-              v-model="activeRecords"
-              @change="handleActiveRecordChange"
-            >
-              <el-collapse-item title="两数之和" name="2">
-                <div class="review__info">
-                  <div class="review__info-warp">
-                    <div class="info">上一次学习：2021-07-25 20:12:30</div>
-                    <div class="info">下一次学习：2021-07-26 20:12:30</div>
-                    <div class="info">
-                      <span class="info__item">已学习：5次</span>
-                    </div>
-                  </div>
-                  <h4>学习内容：</h4>
-                  <div class="review__content">https://baidu.com</div>
-                </div>
-                <h4>学习记录：</h4>
-                <el-button
-                  style="padding: 10px 10px; margin-bottom: 10px"
-                  type="primary"
-                  @click="handleShowReviewItemDialog"
-                >
-                  新增复习记录
-                </el-button>
-                <el-table :data="tableData" border style="width: 100%">
-                  <el-table-column fixed prop="id" label="序号" width="50">
-                  </el-table-column>
-                  <el-table-column prop="date" label="复习时间" width="130">
-                  </el-table-column>
-                  <el-table-column prop="next" label="下次复习时间" width="130">
+                  <el-table-column prop="next" label="下次复习时间" width="125">
+                    <template slot-scope="scope">
+                      <span>{{
+                        dateFormat(
+                          +new Date(scope.row.next),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}</span>
+                    </template>
                   </el-table-column>
                   <el-table-column fixed="right" label="操作" width="50">
-                    <el-button type="text" size="small">编辑</el-button>
+                    <template slot-scope="scope">
+                      <el-button
+                        @click.native.prevent="handleDeleteReview(scope.$index)"
+                        type="text"
+                        size="small"
+                      >
+                        移除
+                      </el-button>
+                    </template>
                   </el-table-column>
                 </el-table>
               </el-collapse-item>
@@ -158,7 +170,10 @@
     <!-- 新增学习记录 -->
     <el-dialog title="新增学习记录" :visible.sync="showNewDialog">
       <el-form :model="newReviewRecord">
-        <el-form-item label="学习内容" :label-width="80">
+        <el-form-item label="学习标题">
+          <el-input v-model="newReviewRecord.name"></el-input>
+        </el-form-item>
+        <el-form-item label="学习内容">
           <el-input
             type="textarea"
             v-model="newReviewRecord.content"
@@ -178,15 +193,17 @@
       <el-form :model="newReviewItem">
         <el-form-item label="下次复习时间">
           <el-date-picker
-            type="date"
+            type="datetime"
             placeholder="选择日期"
             v-model="newReviewItem.date"
+            :default-value="new Date()"
+            default-time="09:00:00"
             style="width: 100%"
           ></el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="showNewReviewItemDialog = false">取 消</el-button>
+        <el-button @click="handleHideReviewItemDialog">取 消</el-button>
         <el-button type="primary" @click="handleAddReviewItem">确 定</el-button>
       </div>
     </el-dialog>
@@ -200,6 +217,8 @@ import {
   normalizeLibList,
   removeLib,
 } from "../lib/storage/storeLib";
+import { createLearning, addReview } from "../lib/storage/storeLearning";
+import { dateFormat } from "../lib/utils";
 
 export default {
   name: "App",
@@ -211,13 +230,7 @@ export default {
       libs: [],
       navList: [],
       selectedTab: "today",
-      tableData: [
-        {
-          id: "01",
-          date: "2021-07-21 15:30:02",
-          next: "2021-07-22 15:30:02",
-        },
-      ],
+      selectedReviewInd: -1,
       selectedLib: {},
       activeRecords: ["1"],
       showNewLibDialog: false,
@@ -226,6 +239,7 @@ export default {
       },
       showNewDialog: false,
       newReviewRecord: {
+        name: "",
         content: "",
       },
       showNewReviewItemDialog: false,
@@ -235,10 +249,14 @@ export default {
     };
   },
   async mounted() {
-    await this.queryLibList();
-    this.selectLib();
+    this.init();
   },
   methods: {
+    dateFormat,
+    async init() {
+      await this.queryLibList();
+      this.selectLib();
+    },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
@@ -260,22 +278,63 @@ export default {
     /**
      * 保存学习记录
      */
-    handleAddReviewRecord() {
+    async handleAddReviewRecord() {
+      if (!this.newReviewRecord.name || !this.newReviewRecord.content) {
+        this.$notify.error({
+          title: "添加失败",
+          message: "学习标题和学习内容必填",
+          duration: 2000,
+        });
+        return;
+      }
+      await createLearning({
+        libId: this.selectedLib.id,
+        name: this.newReviewRecord.name,
+        content: this.newReviewRecord.content,
+      });
       this.showNewDialog = false;
-      console.log(this.newReviewRecord);
+      this.newReviewRecord = {
+        name: "",
+        content: "",
+      };
+      this.init();
     },
     /**
      * 显示复习记录
      */
-    handleShowReviewItemDialog() {
+    handleShowReviewItemDialog(ind) {
       this.showNewReviewItemDialog = true;
+      this.selectedReviewInd = ind;
+    },
+    /**
+     * 取消新增
+     */
+    handleHideReviewItemDialog() {
+      this.showNewReviewItemDialog = false;
+      this.selectedReviewInd = -1;
     },
     /**
      * 保存复习记录
      */
-    handleAddReviewItem() {
+    async handleAddReviewItem() {
       this.showNewReviewItemDialog = false;
-      console.log(this.newReviewItem);
+      if (this.selectedReviewInd === -1 || !this.newReviewItem.date) {
+        this.$notify.error({
+          title: "添加失败",
+          message: "数据有误，请重试",
+          duration: 2000,
+        });
+        return;
+      }
+      await addReview({
+        libId: this.selectedLib.id,
+        learningInd: this.selectedReviewInd,
+        nextReviewDate: this.newReviewItem.date,
+      });
+      await this.queryLibList();
+      this.selectedLib = this.libs.filter(
+        (lib) => String(lib.id) === String(this.selectedLib.id),
+      )[0];
     },
     handleShowNewLib() {
       this.showNewLibDialog = true;
@@ -342,6 +401,7 @@ export default {
       }
 
       this.selectedLib = this.libs[0];
+      console.log(this.selectedLib);
     },
   },
 };
