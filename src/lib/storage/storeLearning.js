@@ -54,6 +54,7 @@ export async function removeLearning(data) {
 
 export async function addReview(data) {
   const lib = await queryLibById(data.libId);
+  console.log(lib);
   if (!lib) {
     return { status: "NO_LIB", msg: "未查到复习库", data: null };
   }
@@ -78,6 +79,7 @@ export async function addReview(data) {
   reviews.id = lib.item[data.learningInd].reviews.length + 1;
 
   lib.item[data.learningInd].reviews.push(reviews);
+  lib.item[data.learningInd].nextReviewTime = reviews.next;
 
   return await updateLib(lib);
 }
