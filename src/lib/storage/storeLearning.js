@@ -31,6 +31,21 @@ export async function createLearning(data) {
   return await updateLib(lib);
 }
 
+export async function removeLearning(data) {
+  const lib = await queryLibById(data.libId);
+  if (!lib) {
+    return { status: "NO_LIB", msg: "未查到复习库", data: null };
+  }
+
+  if (!Array.isArray(lib.item)) {
+    lib.item = [];
+  }
+
+  lib.item.splice(data.learningInd, 1);
+
+  return await updateLib(lib);
+}
+
 // const review = {
 //   id: "01",
 //   date: "2021-07-21 15:30:02",

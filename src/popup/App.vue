@@ -72,6 +72,15 @@
               @change="handleActiveRecordChange"
             >
               <el-collapse-item :title="record.name" :name="index">
+                <section style="text-align: right">
+                  <el-button
+                    style="padding: 3px 4px"
+                    type="danger"
+                    @click="handleDelLearning(index)"
+                  >
+                    删除
+                  </el-button>
+                </section>
                 <div class="review__info">
                   <div class="review__info-warp">
                     <div class="info">
@@ -223,6 +232,7 @@ import {
   createLearning,
   addReview,
   removeReview,
+  removeLearning,
 } from "../lib/storage/storeLearning";
 import { dateFormat } from "../lib/utils";
 
@@ -263,9 +273,6 @@ export default {
       await this.queryLibList();
       this.selectLib();
     },
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
-    },
     handleClick(tab, event) {
       console.log(tab, event);
     },
@@ -303,7 +310,20 @@ export default {
         name: "",
         content: "",
       };
-      this.init();
+      await this.updateSelectedLib();
+    },
+    /**
+     * 删除学习记录
+     */
+    async handleDelLearning(learningInd) {
+      if (!learningInd && Number(learningInd) !== 0) {
+        return;
+      }
+      await removeLearning({
+        libId: this.selectedLib.id,
+        learningInd,
+      });
+      await this.updateSelectedLib();
     },
     /**
      * 显示复习记录
@@ -338,6 +358,10 @@ export default {
         nextReviewDate: this.newReviewItem.date,
       });
       await this.updateSelectedLib();
+      this.selectedReviewInd = -1;
+      this.newReviewItem = {
+        date: "",
+      };
     },
     async handleDeleteReview(review, learningInd) {
       await removeReview({
