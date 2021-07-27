@@ -111,6 +111,23 @@
                   </div>
                 </div>
                 <h4>学习内容：</h4>
+                <el-button
+                  type="primary"
+                  plain
+                  style="margin-bottom: 4px; padding: 6px 4px"
+                  @click="
+                    handleCopyContent(
+                      'copyInputToday' + record.id,
+                      record.content,
+                    )
+                  "
+                >
+                  复制内容
+                </el-button>
+                <input
+                  :ref="'copyInputToday' + record.id"
+                  style="opacity: 0; height: 0"
+                />
                 <div class="review__content">{{ record.content }}</div>
               </div>
               <h4>学习记录：</h4>
@@ -209,6 +226,23 @@
                     </div>
                   </div>
                   <h4>学习内容：</h4>
+                  <el-button
+                    type="primary"
+                    plain
+                    style="margin-bottom: 4px; padding: 6px 4px"
+                    @click="
+                      handleCopyContent(
+                        'copyInputAll' + record.id,
+                        record.content,
+                      )
+                    "
+                  >
+                    复制内容
+                  </el-button>
+                  <input
+                    :ref="'copyInputAll' + record.id"
+                    style="opacity: 0; height: 0"
+                  />
                   <div class="review__content">{{ record.content }}</div>
                 </div>
                 <h4>学习记录：</h4>
@@ -377,6 +411,18 @@ export default {
     async init() {
       await this.queryLibList();
       this.selectLib();
+    },
+    handleCopyContent(refName, content) {
+      const copyElement = this.$refs[refName][0];
+      copyElement.value = content;
+      copyElement.focus();
+      copyElement.select();
+      document.execCommand("Copy", false, null);
+      this.$notify.success({
+        title: "成功",
+        message: "复制成功",
+        duration: 2000,
+      });
     },
     /**
      * 折叠面板事件
