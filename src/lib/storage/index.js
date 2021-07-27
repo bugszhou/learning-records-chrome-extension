@@ -24,7 +24,7 @@
 
 export function store(key, data) {
   return new Promise((resolve) => {
-    chrome.storage.local.set({ [key]: data }, () => {
+    chrome.storage.sync.set({ [key]: data }, () => {
       resolve(data);
     });
   });
@@ -32,7 +32,7 @@ export function store(key, data) {
 
 export function query(key) {
   return new Promise((resolve) => {
-    chrome.storage.local.get([key], (result) => {
+    chrome.storage.sync.get([key], (result) => {
       resolve(result);
     });
   });
@@ -40,7 +40,7 @@ export function query(key) {
 
 export function remove(key) {
   return new Promise((resolve) => {
-    chrome.storage.local.remove(key, () => {
+    chrome.storage.sync.remove(key, () => {
       resolve();
     });
   });
