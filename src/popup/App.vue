@@ -556,6 +556,7 @@ export default {
       const list = await queryLibList();
       const data = normalizeLibList(list);
       this.libs = data;
+      console.log(data);
       this.navList = data.map((item) => ({
         id: item.id,
         name: item.name,

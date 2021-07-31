@@ -17,8 +17,16 @@ export async function createLearning(data) {
   if (!Array.isArray(lib.item)) {
     lib.item = [];
   }
+
+  const maxId = lib.item.reduce((maxVal, learningItem) => {
+    if (maxVal < learningItem.id) {
+      return learningItem.id;
+    }
+    return maxVal;
+  }, 0);
+
   const learning = {
-    id: lib.item.length + 1,
+    id: maxId + 1,
     name: data.name,
     content: data.content,
     lastReviewTime: +new Date(),
