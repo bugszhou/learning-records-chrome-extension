@@ -80,7 +80,14 @@ export async function addReview(data) {
   if (!Array.isArray(item.reviews)) {
     item.reviews = [];
   }
-  reviews.id = item.reviews.length + 1;
+
+  const maxId = item.reviews.reduce((maxVal, review) => {
+    if (maxVal < review.id) {
+      return review.id;
+    }
+    return maxVal;
+  }, 0);
+  reviews.id = maxId + 1;
 
   item.reviews.push(reviews);
   item.nextReviewTime = reviews.next;
