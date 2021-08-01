@@ -49,7 +49,12 @@ export async function removeLearning(data) {
     lib.item = [];
   }
 
-  lib.item.splice(data.learningInd, 1);
+  lib.item = lib.item.filter((learning) => {
+    if (String(learning.id) === String(data.learningId)) {
+      return false;
+    }
+    return true;
+  });
 
   return await updateLib(lib);
 }

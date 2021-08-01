@@ -77,7 +77,7 @@
                 <el-button
                   style="padding: 3px 4px"
                   type="danger"
-                  @click="handleDelLearning(index)"
+                  @click="handleDelLearning(record)"
                 >
                   删除
                 </el-button>
@@ -202,7 +202,7 @@
                   <el-button
                     style="padding: 3px 4px"
                     type="danger"
-                    @click="handleDelLearning(index)"
+                    @click="handleDelLearning(record)"
                   >
                     删除
                   </el-button>
@@ -512,13 +512,13 @@ export default {
     /**
      * 删除学习记录
      */
-    async handleDelLearning(learningInd) {
-      if (!learningInd && Number(learningInd) !== 0) {
+    async handleDelLearning(record) {
+      if (!record.id && Number(record.id) !== 0) {
         return;
       }
       await removeLearning({
         libId: this.selectedLib.id,
-        learningInd,
+        learningId: record.id,
       });
       await this.updateSelectedLib();
     },
@@ -605,6 +605,7 @@ export default {
       const list = await queryLibList();
       const data = normalizeLibList(list);
       this.libs = data;
+      console.log(data);
       this.navList = data.map((item) => ({
         id: item.id,
         name: item.name,
