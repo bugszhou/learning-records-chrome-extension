@@ -128,7 +128,19 @@ export function normalizeLibList(list) {
       if (!curr || !curr.nextReviewTime) {
         return total;
       }
-      const nextReviewTime = +new Date(curr.nextReviewTime);
+
+      const reviews = Array.isArray(curr.reviews) ? curr.reviews : [];
+
+      const lastReview = reviews[reviews.length - 1];
+
+      if (!lastReview) {
+        curr.nextReviewTime = +new Date();
+        total += 1;
+        return total;
+      }
+
+      const nextReviewTime = +new Date(lastReview.next);
+      curr.nextReviewTime = lastReview.next;
 
       const todayDate = new Date();
       const todayStart = new Date(
@@ -177,7 +189,7 @@ export function normalizeLibList(list) {
         todayDate.getDate() + 1,
       );
 
-      if (nextReviewTime >= +todayStart && nextReviewTime < +todayEnd) {
+      if (+nextReviewTime >= +todayStart && +nextReviewTime < +todayEnd) {
         return true;
       }
       return false;
