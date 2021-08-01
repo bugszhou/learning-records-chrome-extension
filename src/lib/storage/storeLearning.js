@@ -118,6 +118,52 @@ export async function addReview(data) {
   return await updateLib(lib);
 }
 
+export async function updateReview(options) {
+  const lib = await queryLibById(options.libId);
+  if (!lib) {
+    return { status: "NO_LIB", msg: "未查到复习库", data: null };
+  }
+
+  if (!Array.isArray(lib.item)) {
+    return { status: "NO_LEARNING", msg: "未查到学习记录", data: null };
+  }
+
+  if (!options.nextReviewDate) {
+    return { status: "TIME_ERROR", msg: "下一次复习时间错误", data: null };
+  }
+
+  const item = lib.item.filter(
+    (learning) => String(learning.id) === String(options.learningId),
+  )[0];
+
+  if (!Array.isArray(item.reviews)) {
+    item.reviews = [];
+  }
+
+  item.reviews.forEach((review) => {
+    if (String(review.id) === String(options.reviewId)) {
+      review.next = +new Date(options.nextReviewDate);
+    }
+  });
+
+  let ind = -1;
+  lib.item.some((learning, index) => {
+    if (String(learning.id) === String(options.learningId)) {
+      ind = index;
+      return true;
+    }
+    return false;
+  });
+
+  if (ind === -1) {
+    return { status: "LEARNING_ERROR", msg: "未找到学习记录", data: null };
+  }
+
+  lib.item[ind] = item;
+
+  return await updateLib(lib);
+}
+
 export async function removeReview(options) {
   if (!options.reviewId) {
     return { status: "INDEX_ERROR", msg: "复习记录编号错误", data: null };

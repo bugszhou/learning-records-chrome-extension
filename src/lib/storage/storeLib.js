@@ -148,11 +148,22 @@ export function normalizeLibList(list) {
       return total;
     }, 0);
 
-    item.todayList =  item.item.filter((curr) => {
+    item.todayList = item.item.filter((curr) => {
       if (!curr || !curr.nextReviewTime) {
         return false;
       }
-      const nextReviewTime = +new Date(curr.nextReviewTime);
+
+      const reviews = Array.isArray(curr.reviews) ? curr.reviews : [];
+
+      const lastReview = reviews[reviews.length - 1];
+
+      if (!lastReview) {
+        curr.nextReviewTime = +new Date();
+        return true;
+      }
+
+      const nextReviewTime = +new Date(lastReview.next);
+      curr.nextReviewTime = lastReview.next;
 
       const todayDate = new Date();
       const todayStart = new Date(
@@ -167,7 +178,7 @@ export function normalizeLibList(list) {
       );
 
       if (nextReviewTime >= +todayStart && nextReviewTime < +todayEnd) {
-        return true
+        return true;
       }
       return false;
     });

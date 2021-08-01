@@ -161,8 +161,18 @@
                     }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column fixed="right" label="操作" width="50">
+                <el-table-column fixed="right" label="操作" width="90">
                   <template slot-scope="scope">
+                    <el-button
+                      v-if="scope.$index === record.reviews.length - 1"
+                      @click.native.prevent="
+                        handleShowEditReviewDialog(scope.row, record)
+                      "
+                      type="text"
+                      size="small"
+                    >
+                      修改
+                    </el-button>
                     <el-button
                       @click.native.prevent="
                         handleDeleteReview(scope.row, record)
@@ -276,8 +286,18 @@
                       }}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column fixed="right" label="操作" width="50">
+                  <el-table-column fixed="right" label="操作" width="90">
                     <template slot-scope="scope">
+                      <el-button
+                        v-if="scope.$index === record.reviews.length - 1"
+                        @click.native.prevent="
+                          handleShowEditReviewDialog(scope.row, record)
+                        "
+                        type="text"
+                        size="small"
+                      >
+                        修改
+                      </el-button>
                       <el-button
                         @click.native.prevent="
                           handleDeleteReview(scope.row, record)
@@ -340,7 +360,7 @@
             placeholder="选择日期"
             v-model="newReviewItem.date"
             :default-value="new Date()"
-            default-time="09:00:00"
+            default-time="10:00:00"
             style="width: 100%"
           ></el-date-picker>
         </el-form-item>
@@ -348,6 +368,28 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleHideReviewItemDialog">取 消</el-button>
         <el-button type="primary" @click="handleAddReviewItem">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 修改复习记录 -->
+    <el-dialog title="修改复习记录" :visible.sync="showEditReviewItemDialog">
+      <el-form :model="editReviewItem">
+        <el-form-item label="下次复习时间">
+          <el-date-picker
+            type="datetime"
+            placeholder="选择日期"
+            v-model="editReviewItem.date"
+            :default-value="new Date()"
+            default-time="10:00:00"
+            style="width: 100%"
+          ></el-date-picker>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleHideEditReviewItemDialog">取 消</el-button>
+        <el-button type="primary" @click="handleUpdateReviewItem">
+          确 定
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -365,6 +407,7 @@ import {
   addReview,
   removeReview,
   removeLearning,
+  updateReview,
 } from "../lib/storage/storeLearning";
 import { dateFormat } from "../lib/utils";
 
@@ -391,6 +434,12 @@ export default {
       },
       showNewReviewItemDialog: false,
       newReviewItem: {
+        date: "",
+      },
+      showEditReviewItemDialog: false,
+      editReviewItem: {
+        learningId: "",
+        id: "",
         date: "",
       },
     };
@@ -556,7 +605,6 @@ export default {
       const list = await queryLibList();
       const data = normalizeLibList(list);
       this.libs = data;
-      console.log(data);
       this.navList = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -598,13 +646,47 @@ export default {
 
       this.selectedLib = this.libs[0];
     },
+    handleHideEditReviewItemDialog() {
+      this.showEditReviewItemDialog = false;
+    },
+    handleShowEditReviewDialog(opts, record) {
+      this.showEditReviewItemDialog = true;
+      this.editReviewItem.id = opts.id;
+      this.editReviewItem.learningId = record.id;
+      this.editReviewItem.date = opts.next;
+    },
+    async handleUpdateReviewItem() {
+      if (!this.selectedLib.id || !this.editReviewItem.date) {
+        this.$notify.error({
+          title: "修改失败",
+          message: "数据有误，请重试",
+          duration: 2000,
+        });
+        return;
+      }
+
+      await updateReview({
+        libId: this.selectedLib.id,
+        learningId: this.editReviewItem.learningId,
+        reviewId: this.editReviewItem.id,
+        nextReviewDate: this.editReviewItem.date,
+      });
+      await this.updateSelectedLib();
+      this.selectedReview = null;
+      this.newReviewItem = {
+        learningId: "",
+        id: "",
+        date: "",
+      };
+      this.handleHideEditReviewItemDialog();
+    },
   },
 };
 </script>
 
 <style>
 html {
-  width: 400px;
+  width: 420px;
   height: 800px;
   overflow: auto;
 }
