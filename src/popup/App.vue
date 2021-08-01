@@ -72,7 +72,10 @@
             v-bind:key="record.id"
             @change="handleActiveRecordChange"
           >
-            <el-collapse-item :title="record.name" :name="index">
+            <el-collapse-item
+              :title="`${record.id} - ${record.name}`"
+              :name="index"
+            >
               <section style="text-align: right">
                 <el-button
                   style="padding: 3px 4px"
@@ -197,7 +200,10 @@
               v-bind:key="record.id"
               @change="handleActiveRecordChange"
             >
-              <el-collapse-item :title="record.name" :name="index">
+              <el-collapse-item
+                :title="`${record.id} - ${record.name}`"
+                :name="index"
+              >
                 <section style="text-align: right">
                   <el-button
                     style="padding: 3px 4px"
