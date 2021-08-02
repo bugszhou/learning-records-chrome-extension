@@ -18,6 +18,7 @@ import {
   Form,
   FormItem,
   Card,
+  Calendar,
 } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import App from "./App.vue";
@@ -41,6 +42,7 @@ Vue.use(Dialog);
 Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Card);
+Vue.use(Calendar);
 /* eslint-disable no-new */
 new Vue({
   el: "#app",
