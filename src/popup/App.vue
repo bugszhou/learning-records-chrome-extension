@@ -747,6 +747,9 @@ export default {
     },
     handleToggleReviewCalendar() {
       this.showCalendar = !this.showCalendar;
+      if (this.showCalendar) {
+        this.countCalendar();
+      }
     },
   },
 };
