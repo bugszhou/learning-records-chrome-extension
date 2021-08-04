@@ -100,7 +100,11 @@
               @change="handleActiveRecordChange"
             >
               <el-collapse-item
-                :title="`${record.id} - ${record.name}`"
+                :title="`${record.id} - ${record.name} (${
+                  record.reviews && record.reviews.length
+                    ? record.reviews.length
+                    : 0
+                }次)`"
                 :name="index"
               >
                 <section style="text-align: right">
@@ -228,7 +232,11 @@
                 @change="handleActiveRecordChange"
               >
                 <el-collapse-item
-                  :title="`${record.id} - ${record.name}`"
+                  :title="`${record.id} - ${record.name} (${
+                    record.reviews && record.reviews.length
+                      ? record.reviews.length
+                      : 0
+                  }次)`"
                   :name="index"
                 >
                   <section style="text-align: right">
