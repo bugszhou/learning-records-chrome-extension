@@ -135,7 +135,6 @@ export function normalizeLibList(list) {
 
       if (!lastReview) {
         curr.nextReviewTime = +new Date();
-        total += 1;
         return total;
       }
 
@@ -171,7 +170,7 @@ export function normalizeLibList(list) {
 
       if (!lastReview) {
         curr.nextReviewTime = +new Date();
-        return true;
+        return false;
       }
 
       const nextReviewTime = +new Date(lastReview.next);
@@ -192,6 +191,21 @@ export function normalizeLibList(list) {
       if (+nextReviewTime >= +todayStart && +nextReviewTime < +todayEnd) {
         return true;
       }
+      return false;
+    });
+
+    item.noStudies = item.item.filter((curr) => {
+      if (!curr || !curr.nextReviewTime) {
+        return true;
+      }
+
+      const reviews = Array.isArray(curr.reviews) ? curr.reviews : [];
+
+      if (reviews.length == 0) {
+        curr.nextReviewTime = +new Date();
+        return true;
+      }
+
       return false;
     });
   });
