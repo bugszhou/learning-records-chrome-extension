@@ -208,6 +208,26 @@ export function normalizeLibList(list) {
 
       return false;
     });
+
+    item.expiredStudies = item.item.filter((curr) => {
+      if (!curr || !curr.nextReviewTime) {
+        return false;
+      }
+
+      const reviews = Array.isArray(curr.reviews) ? curr.reviews : [];
+
+      if (reviews.length == 0) {
+        return false;
+      }
+
+      const lastReview = reviews[reviews.length - 1];
+
+      if (lastReview.next < Date.now()) {
+        return true;
+      }
+
+      return false;
+    });
   });
 
   return list;

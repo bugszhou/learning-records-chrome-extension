@@ -357,6 +357,140 @@
             </el-collapse>
           </div>
         </el-card>
+        <el-card class="today-card">
+          <div slot="header" class="clearfix">
+            <span>过期内容</span>
+          </div>
+          <div class="review__body">
+            <el-collapse
+              v-for="(record, index) in selectedLib.expiredStudies"
+              v-bind:key="record.id"
+              @change="handleActiveRecordChange"
+            >
+              <el-collapse-item
+                :title="`${record.id} - ${record.name} (${
+                  record.reviews && record.reviews.length
+                    ? record.reviews.length
+                    : 0
+                }次)`"
+                :name="index"
+              >
+                <section style="text-align: right">
+                  <el-button
+                    style="padding: 3px 4px"
+                    type="danger"
+                    @click="handleDelLearning(record)"
+                  >
+                    删除
+                  </el-button>
+                </section>
+                <div class="review__info">
+                  <div class="review__info-warp">
+                    <div class="info">
+                      上一次学习：{{
+                        dateFormat(
+                          +new Date(record.lastReviewTime),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}
+                    </div>
+                    <div class="info">
+                      下一次学习：{{
+                        dateFormat(
+                          +new Date(record.nextReviewTime),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}
+                    </div>
+                    <div class="info">
+                      <span class="info__item"
+                        >已学习：{{
+                          record.reviews && record.reviews.length
+                            ? record.reviews.length
+                            : 0
+                        }}次</span
+                      >
+                    </div>
+                  </div>
+                  <h4>学习内容：</h4>
+                  <el-button
+                    type="primary"
+                    plain
+                    style="margin-bottom: 4px; padding: 6px 4px"
+                    @click="
+                      handleCopyContent(
+                        'copyInputToday' + record.id,
+                        record.content,
+                      )
+                    "
+                  >
+                    复制内容
+                  </el-button>
+                  <input
+                    :ref="'copyInputToday' + record.id"
+                    style="opacity: 0; height: 0"
+                  />
+                  <div class="review__content">{{ record.content }}</div>
+                </div>
+                <h4>学习记录：</h4>
+                <el-button
+                  style="padding: 10px 10px; margin-bottom: 10px"
+                  type="primary"
+                  @click="handleShowReviewItemDialog(record)"
+                >
+                  新增复习记录
+                </el-button>
+                <el-table :data="record.reviews" border style="width: 100%">
+                  <el-table-column fixed prop="id" label="序号" width="50">
+                  </el-table-column>
+                  <el-table-column prop="date" label="复习时间" width="100">
+                    <template slot-scope="scope">
+                      <span>{{
+                        dateFormat(
+                          +new Date(scope.row.date),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="next" label="下次复习时间" width="105">
+                    <template slot-scope="scope">
+                      <span>{{
+                        dateFormat(
+                          +new Date(scope.row.next),
+                          "yyyy-MM-dd hh:mm:ss",
+                        )
+                      }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column fixed="right" label="操作" width="90">
+                    <template slot-scope="scope">
+                      <el-button
+                        v-if="scope.$index === record.reviews.length - 1"
+                        @click.native.prevent="
+                          handleShowEditReviewDialog(scope.row, record)
+                        "
+                        type="text"
+                        size="small"
+                      >
+                        修改
+                      </el-button>
+                      <el-button
+                        @click.native.prevent="
+                          handleDeleteReview(scope.row, record)
+                        "
+                        type="text"
+                        size="small"
+                      >
+                        移除
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+        </el-card>
         <el-tabs v-model="selectedTab" type="border-card">
           <el-tab-pane label="全部内容" name="1">
             <div class="review__body">
